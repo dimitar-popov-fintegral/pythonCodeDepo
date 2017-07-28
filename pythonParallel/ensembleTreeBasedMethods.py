@@ -1,7 +1,6 @@
 '''
 :author: D POPOV
-:description: The purpose of this code is to construct some example code for ensemble tree based methods in Python
-                furthermore; parallel tools are encouraged for use
+:description: The purpose of this code is to construct some example code for parallel tools in Python
 '''
 
 import numpy
@@ -33,5 +32,5 @@ results = [output.get() for p in processes]
 print results
 
 '''
-START HERE!!!!!!
+:results: parallelized simple program for creating random numbers
 '''
