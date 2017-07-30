@@ -8,39 +8,45 @@
 import tensorflow
 import numpy
 import multiprocess
-
-'''
-Define linear model and objective function
-'''
-# (W * x) + (b)
-# Variables
-W = tensorflow.Variable([1.], dtype=tensorflow.float32)
-b = tensorflow.Variable([.1], dtype=tensorflow.float32)
-# Input
-x = tensorflow.placeholder(dtype=tensorflow.float32)
-# Output
-y = tensorflow.placeholder(dtype=tensorflow.float32)
-# Model and MSE
-LM = (W * x) + b
-MSE = tensorflow.reduce_sum(tensorflow.square(LM-y))
-
-'''
-Function optimizer
-'''
-# Gradient Descent
-lr = tensorflow.placeholder(dtype=tensorflow.float32)
-optim = tensorflow.train.GradientDescentOptimizer(lr).minimize(MSE)
-
-'''
-Data - Training
-'''
-xTrain = [1,2,3,4]
-yTrain = [i + numpy.pi for i in xTrain]
+import pprint
 
 '''
 Define function for parallel apply
 '''
-def parallel_gradient_descent(iterations, inputDict):
+def parallel_gradient_descent(iterations, learningRate):
+    '''
+    Define linear model and objective function
+    '''
+    # (W * x) + (b)
+    # Variables
+    W = tensorflow.Variable([1.], dtype=tensorflow.float32)
+    b = tensorflow.Variable([.1], dtype=tensorflow.float32)
+    # Input
+    x = tensorflow.placeholder(dtype=tensorflow.float32)
+    # Output
+    y = tensorflow.placeholder(dtype=tensorflow.float32)
+    # Model and MSE
+    LM = (W * x) + b
+    MSE = tensorflow.reduce_sum(tensorflow.square(LM - y))
+
+    '''
+    Function optimizer
+    '''
+    # Gradient Descent
+    lr = tensorflow.placeholder(dtype=tensorflow.float32)
+    optim = tensorflow.train.GradientDescentOptimizer(lr).minimize(MSE)
+
+    '''
+    Data - Training
+    '''
+    xTrain = [1, 2, 3, 4]
+    yTrain = [i + numpy.pi for i in xTrain]
+
+    inputDict = {x: xTrain, y: yTrain, lr: learningRate}
+
+    '''
+    Optimize towards objective
+    '''
     init = tensorflow.global_variables_initializer()
     session = tensorflow.Session()
     session.run(init)
@@ -56,8 +62,8 @@ def parallel_gradient_descent(iterations, inputDict):
 Parallel initilization
 '''
 output = multiprocess.Queue()
-feedDict = {lr: 0.1, x: xTrain, y: yTrain}
-processes = [multiprocess.Process(target=parallel_gradient_descent, args=(1000, feedDict)) for x in range(1)]
+learningRateVector = [.01, .001, .025, .015]
+processes = [multiprocess.Process(target=parallel_gradient_descent, args=(1000, learningRateVector[x])) for x in range(4)]
 
 for p in processes:
     p.start()
@@ -67,4 +73,4 @@ for p in processes:
 
 results = [output.get() for p in processes]
 
-print results
+pprint.pprint(results)
